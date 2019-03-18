@@ -18,7 +18,7 @@ KUSIS ID: 53940 PARTNER NAME: Asli Karahan
 
 
 
-int parseCommand(char inputBuffer[], char *args[],int *background, char* file[], int* redir , int* comm_count);
+int parseCommand(char inputBuffer[], char *args[],int *background, char* file[], int* redir , int* comm_count, char* hist[]);
 int executeCommand(char *args[], char* file[],int redr, int backg); //char** hist);
 int main(void)
 {
@@ -31,14 +31,14 @@ int main(void)
   int i, upper;
   int redir;  //redirection flag
   char *file[MAX_LINE/2 + 1];	 //output filename
-  //char *history[10];
-  int command_count =-1;
+  char *history[10];
+  int command_count =0;
 
   while (shouldrun){            		/* Program terminates normally inside setup */
     background = 0;
     redir =0;
 
-    shouldrun = parseCommand(inputBuffer,args,&background, file, &redir, &command_count);       /* get next command */
+    shouldrun = parseCommand(inputBuffer,args,&background, file, &redir, &command_count, history);       /* get next command */
 
     if (strncmp(inputBuffer, "exit", 4) == 0)
     shouldrun = 0;     /* Exiting from shelldon*/
@@ -52,16 +52,16 @@ int main(void)
       */
       executeCommand(args, file, redir, background);//, history);
       printf("%d\n", command_count );
-      // if (command_count<10){
-      //   for(int i =0; i<command_count; i++){
-      //     printf("%s\n", history[i]);
-      //   }
-      // }else{
-      //   for(int i =0; i<10; i++){
-      //     printf("%s\n", history[i]);
-      //
-      //   }
-      // }
+      if (command_count<10){
+        for(int i =0; i<command_count; i++){
+          printf("%s\n", history[i]);
+        }
+      }else{
+        for(int i =0; i<10; i++){
+          printf("%s\n", history[i]);
+
+        }
+      }
 
 
 
@@ -77,7 +77,7 @@ int main(void)
 * will become null-terminated, C-style strings.
 */
 
-int parseCommand(char inputBuffer[], char *args[],int *background, char* file[], int* redir, int* comm_count )
+int parseCommand(char inputBuffer[], char *args[],int *background, char* file[], int* redir, int* comm_count, char* hist[] )
 {
   int length,		/* # of characters in the command line */
   i,		/* loop index for accessing inputBuffer array */
@@ -95,6 +95,10 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
   }
   while (inputBuffer[0] == '\n'); /* swallow newline characters */
   printf("%s\n", inputBuffer);
+  int asd = *comm_count;
+  hist[asd%10]= inputBuffer;
+  // printf("This is pointer val %d\n", asd );
+
   /**
   *  0 is the system predefined file descriptor for stdin (standard input),
   *  which is the user's screen in this case. inputBuffer by itself is the
@@ -188,7 +192,7 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
 
   args[ct] = NULL; /* just in case the input line was > 80 */
   *comm_count = *comm_count+1;
-  printf("comm_count is %d\n", *comm_count%10);
+  // printf("comm_count is %d\n", (*comm_count)%10);
 
   return 1;
 
