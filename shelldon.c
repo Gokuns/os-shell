@@ -1,7 +1,7 @@
 /*
 * shelldon interface program
 
-KUSIS ID: PARTNER NAME:
+KUSIS ID:54040 PARTNER NAME: Gökalp Ünsal
 KUSIS ID: PARTNER NAME:
 
 */
@@ -15,6 +15,8 @@ KUSIS ID: PARTNER NAME:
 #include <fcntl.h>
 
 #define MAX_LINE       80 /* 80 chars per line, per command, should be enough. */
+
+
 
 int parseCommand(char inputBuffer[], char *args[],int *background, char* file[], int* redir , int* comm_count);
 int executeCommand(char *args[], char* file[],int redr, int backg); //char** hist);
