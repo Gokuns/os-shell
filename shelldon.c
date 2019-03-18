@@ -42,7 +42,6 @@ int main(void)
 
     if (strncmp(inputBuffer, "exit", 4) == 0)
     shouldrun = 0;     /* Exiting from shelldon*/
-
     if (shouldrun) {
       /*
       After reading user input, the steps are
@@ -54,11 +53,11 @@ int main(void)
       printf("%d\n", command_count );
       if (command_count<10){
         for(int i =0; i<command_count; i++){
-          printf("%s\n", history[i]);
+          printf("History is %s\n", history[i]);
         }
       }else{
         for(int i =0; i<10; i++){
-          printf("%s\n", history[i]);
+          printf("History is %s\n", history[i]);
 
         }
       }
@@ -88,15 +87,22 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
   ct = 0;
   int ct_2 =0;
   /* read what the user enters on the command line */
+  printf("Given input buffer is %s\n", inputBuffer);
+  memset(inputBuffer, 0, MAX_LINE * sizeof(char));
+  printf("Input buffer after sifirlama is %s\n", inputBuffer);
+
+
   do {
     printf("shelldon>");
     fflush(stdout);
     length = read(STDIN_FILENO,inputBuffer,MAX_LINE);
   }
   while (inputBuffer[0] == '\n'); /* swallow newline characters */
-  printf("%s\n", inputBuffer);
+  printf(" Current input buffer is %s\n", inputBuffer);
   int asd = *comm_count;
-  hist[asd%10]= inputBuffer;
+
+  hist[asd%10]= malloc(MAX_LINE * sizeof(char));
+  strcat(hist[asd%10], inputBuffer);
   // printf("This is pointer val %d\n", asd );
 
   /**
@@ -201,63 +207,63 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
 int executeCommand(char *args[], char* file[],int redr, int backg){//, char* hist[]){
 
 
-        pid_t pid;
-        int out =0;
-        int xf;
-        pid=fork();
-        if (pid == 0){ //child process
-          // out=execvp(args[0], args);
-          // printf("Redirected val is%d\n", redir);
-          //
-          // printf("Filename is %s\n", file[0] );
-          // printf("Filename is %s\n", file[1] );
-          // printf("Filename is %s\n", file[2] );
-          mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-          if(redr ==2){
-            xf=open(file[1],O_RDWR|O_TRUNC|O_CREAT, mode);
-          }else if (redr ==1){
-            xf=open(file[1], O_RDWR|O_APPEND|O_CREAT, mode);
-          }
-          dup2(xf,1);
-          char* path = malloc(strlen("/bin/")+strlen(args[0]));
-          strcpy(path,"/bin/" );
-          strcat(path, args[0] );
-          out=execv(path, args);
-          if (out<0){
-            execvp(args[0], args);
-          }
+  pid_t pid;
+  int out =0;
+  int xf;
+  pid=fork();
+  if (pid == 0){ //child process
+    // out=execvp(args[0], args);
+    // printf("Redirected val is%d\n", redir);
+    //
+    // printf("Filename is %s\n", file[0] );
+    // printf("Filename is %s\n", file[1] );
+    // printf("Filename is %s\n", file[2] );
+    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+    if(redr ==2){
+      xf=open(file[1],O_RDWR|O_TRUNC|O_CREAT, mode);
+    }else if (redr ==1){
+      xf=open(file[1], O_RDWR|O_APPEND|O_CREAT, mode);
+    }
+    dup2(xf,1);
+    char* path = malloc(strlen("/bin/")+strlen(args[0]));
+    strcpy(path,"/bin/" );
+    strcat(path, args[0] );
+    out=execv(path, args);
+    if (out<0){
+      execvp(args[0], args);
+    }
 
 
-          // history[c_count%10]=args;
+    // history[c_count%10]=args;
 
 
-          close(xf);
-          exit(1);
+    close(xf);
+    exit(1);
 
 
-        }else if(pid>0){
+  }else if(pid>0){
 
-          if(backg != 1){
-            // printf("Waitin for child to exit\n" );
-            wait(NULL);
+    if(backg != 1){
+      // printf("Waitin for child to exit\n" );
+      wait(NULL);
 
-          }
-          // printf("Child exited\n" );
+    }
+    // printf("Child exited\n" );
 
-        }
+  }
 
-        // strncpy(hist[*comm_count], *args, MAX_LINE );
-        // if(*comm_count==0){
-        //   hist[0]=args[0];
-        //
-        // }else if (*comm_count==1){
-        //   hist[1]=args[1];
-        //
-        // }else{
-        //   hist[2]=args[0];
-        //
-        // }
-        // // hist[0]=args[0];
-        // printf("%s\n", hist[(*comm_count)%10]);
-        return 1;
+  // strncpy(hist[*comm_count], *args, MAX_LINE );
+  // if(*comm_count==0){
+  //   hist[0]=args[0];
+  //
+  // }else if (*comm_count==1){
+  //   hist[1]=args[1];
+  //
+  // }else{
+  //   hist[2]=args[0];
+  //
+  // }
+  // // hist[0]=args[0];
+  // printf("%s\n", hist[(*comm_count)%10]);
+  return 1;
 }
