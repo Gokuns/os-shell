@@ -1,8 +1,8 @@
 /*
 * shelldon interface program
 
-KUSIS ID:54040 PARTNER NAME: Gökalp Ünsal
-KUSIS ID: PARTNER NAME:
+KUSIS ID: 54040 PARTNER NAME: Gökalp Ünsal
+KUSIS ID: 53940 PARTNER NAME: Asli Karahan
 
 */
 
