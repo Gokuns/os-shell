@@ -19,7 +19,7 @@ KUSIS ID: 53940 PARTNER NAME: Asli Karahan
 
 
 int parseCommand(char inputBuffer[], char *args[],int *background, char* file[], int* redir , int* comm_count, char* hist[]);
-int executeCommand(char *args[], char* file[],int redr, int backg); //char** hist);
+int executeCommand(char *args[], char* file[],int redr, int backg, char* hist[]); //char** hist);
 int main(void)
 {
   char inputBuffer[MAX_LINE]; 	        /* buffer to hold the command entered */
@@ -33,7 +33,6 @@ int main(void)
   char *file[MAX_LINE/2 + 1];	 //output filename
   char *history[10];
   int command_count =0;
-
   while (shouldrun){            		/* Program terminates normally inside setup */
     background = 0;
     redir =0;
@@ -49,15 +48,15 @@ int main(void)
       (2) the child process will invoke execv()
       (3) if command included &, parent will invoke wait()
       */
-      executeCommand(args, file, redir, background);//, history);
+      executeCommand(args, file, redir, background, history);
       printf("%d\n", command_count );
       if (command_count<10){
         for(int i =0; i<command_count; i++){
-          printf("History is %s\n", history[i]);
+        //  printf("History is %s\n", history[i]);
         }
       }else{
         for(int i =0; i<10; i++){
-          printf("History is %s\n", history[i]);
+          //printf("History is %s\n", history[i]);
 
         }
       }
@@ -87,9 +86,9 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
   ct = 0;
   int ct_2 =0;
   /* read what the user enters on the command line */
-  printf("Given input buffer is %s\n", inputBuffer);
+//  printf("Given input buffer is %s\n", inputBuffer);
   memset(inputBuffer, 0, MAX_LINE * sizeof(char));
-  printf("Input buffer after sifirlama is %s\n", inputBuffer);
+//  printf("Input buffer after sifirlama is %s\n", inputBuffer);
 
 
   do {
@@ -98,7 +97,7 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
     length = read(STDIN_FILENO,inputBuffer,MAX_LINE);
   }
   while (inputBuffer[0] == '\n'); /* swallow newline characters */
-  printf(" Current input buffer is %s\n", inputBuffer);
+  //printf(" Current input buffer is %s\n", inputBuffer);
   int asd = *comm_count;
 
   hist[asd%10]= malloc(MAX_LINE * sizeof(char));
@@ -183,6 +182,14 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
 
         }
 
+      }else if(inputBuffer[i] == '!'){
+        if(inputBuffer[i+1] == '!'){
+          *redir=3;
+          i=i+1;
+        }else if(hist[inputBuffer[i+1]]){
+          *redir=4;
+          i=i+1;
+        }
       }
 
 
@@ -204,7 +211,7 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
 
 } /* end of parseCommand routine */
 
-int executeCommand(char *args[], char* file[],int redr, int backg){//, char* hist[]){
+int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[]){
 
 
   pid_t pid;
@@ -232,9 +239,14 @@ int executeCommand(char *args[], char* file[],int redr, int backg){//, char* his
     if (out<0){
       execvp(args[0], args);
     }
-
-
+    if(redr==3){
+      for(int i=0;sizeof(hist)/sizeof(hist[0]);i++){
+        if(hist[i]){
+    printf("%d- %s\n", i, hist[i]);
+  }
     // history[c_count%10]=args;
+  }
+  }
 
 
     close(xf);
