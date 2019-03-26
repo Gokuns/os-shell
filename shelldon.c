@@ -19,7 +19,7 @@ KUSIS ID: 53940 PARTNER NAME: Asli Karahan
 
 
 int parseCommand(char inputBuffer[], char *args[],int *background, char* file[], int* redir , int* comm_count, char* hist[]);
-int executeCommand(char *args[], char* file[],int redr, int backg, char* hist[]); //char** hist);
+int executeCommand(char *args[], char* file[],int redr, int backg, char* hist[], int* comm_count); //char** hist);
 int main(void)
 {
   char inputBuffer[MAX_LINE]; 	        /* buffer to hold the command entered */
@@ -31,7 +31,7 @@ int main(void)
   int i, upper;
   int redir;  //redirection flag
   char *file[MAX_LINE/2 + 1];	 //output filename
-  char *history[10];
+  char *history[11];
   int command_count =0;
   while (shouldrun){            		/* Program terminates normally inside setup */
     background = 0;
@@ -48,7 +48,7 @@ int main(void)
       (2) the child process will invoke execv()
       (3) if command included &, parent will invoke wait()
       */
-      executeCommand(args, file, redir, background, history);
+      executeCommand(args, file, redir, background, history, &command_count);
       printf("%d\n", command_count );
       if (command_count<10){
         for(int i =0; i<command_count; i++){
@@ -99,9 +99,18 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
   while (inputBuffer[0] == '\n'); /* swallow newline characters */
   //printf(" Current input buffer is %s\n", inputBuffer);
   int asd = *comm_count;
-
-  hist[asd%10]= malloc(MAX_LINE * sizeof(char));
-  strcat(hist[asd%10], inputBuffer);
+if(asd+1<10){
+  printf("ctRem is: %d\n", asd);
+  for(int i=asd+1;i>=0;i--){
+    hist[i+1]=hist[i];
+  }
+}else if (asd+1>=10){
+  for(int i=10;i>=0;i--){
+    hist[i+1]=hist[i];
+  }
+}
+hist[0]= malloc(MAX_LINE * sizeof(char));
+strcat(hist[0], inputBuffer);
   // printf("This is pointer val %d\n", asd );
 
   /**
@@ -171,7 +180,7 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
         *background  = 1;
         inputBuffer[i-1] = '\0';
       }
-      if(inputBuffer[i] == '>'){
+      if(inputBuffer[i] == '>'){// Check this later
         if(i!=(length-1) && inputBuffer[i+1]=='>'){
           *redir=1;
           i=i+1;
@@ -184,12 +193,14 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
 
       }else if(inputBuffer[i] == '!'){
         if(inputBuffer[i+1] == '!'){
-          *redir=3;
+          *redir=4;
           i=i+1;
         }else if(hist[inputBuffer[i+1]]){
           *redir=4;
           i=i+1;
         }
+      }else if(strncmp(inputBuffer, "history", 4) == 0){
+        *redir=3;
       }
 
 
@@ -211,12 +222,14 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
 
 } /* end of parseCommand routine */
 
-int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[]){
+int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[], int *comm_count){
 
 
   pid_t pid;
   int out =0;
   int xf;
+  int ct = *comm_count;
+  printf("%d\n", ct);
   pid=fork();
   if (pid == 0){ //child process
     // out=execvp(args[0], args);
@@ -240,14 +253,20 @@ int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[])
       execvp(args[0], args);
     }
     if(redr==3){
-      for(int i=0;sizeof(hist)/sizeof(hist[0]);i++){
-        if(hist[i]){
-    printf("%d- %s\n", i, hist[i]);
-  }
-    // history[c_count%10]=args;
-  }
-  }
+      if(ct<=10){
+        for(int i=ct;i>1;i--){
+          printf("%d- %s", i-1, hist[i-1]);
+          }
+      }else if(ct>10){
+        for(int i=10;i>0;i--){
+          printf("%d- %s", i, hist[i]);
+        }
+      }
+    }else if(redr==4){
 
+
+      
+    }
 
     close(xf);
     exit(1);
