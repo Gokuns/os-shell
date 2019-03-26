@@ -18,7 +18,7 @@ KUSIS ID: 53940 PARTNER NAME: Asli Karahan
 
 
 
-int parseCommand(char inputBuffer[], char *args[],int *background, char* file[], int* redir , int* comm_count, char* hist[]);
+int parseCommand(char inputBuffer[], char *args[],int *background, char* file[], int* redir , int* comm_count, char *hist[]);
 int executeCommand(char *args[], char* file[],int redr, int backg, char* hist[], int* comm_count); //char** hist);
 int main(void)
 {
@@ -90,7 +90,7 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
   memset(inputBuffer, 0, MAX_LINE * sizeof(char));
 //  printf("Input buffer after sifirlama is %s\n", inputBuffer);
 
-
+if(redir!=4 || redir != 5){
   do {
     printf("shelldon>");
     fflush(stdout);
@@ -98,6 +98,7 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
   }
   while (inputBuffer[0] == '\n'); /* swallow newline characters */
   //printf(" Current input buffer is %s\n", inputBuffer);
+}
   int asd = *comm_count;
 if(asd+1<10){
   printf("ctRem is: %d\n", asd);
@@ -195,8 +196,9 @@ strcat(hist[0], inputBuffer);
         if(inputBuffer[i+1] == '!'){
           *redir=4;
           i=i+1;
+          parseCommand(hist[1], args,background, file, redir, comm_count,hist);
         }else if(hist[inputBuffer[i+1]]){
-          *redir=4;
+          *redir=5;
           i=i+1;
         }
       }else if(strncmp(inputBuffer, "history", 4) == 0){
@@ -228,8 +230,7 @@ int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[],
   pid_t pid;
   int out =0;
   int xf;
-  int ct = *comm_count;
-  printf("%d\n", ct);
+  int ct = *comm_count; // command counter
   pid=fork();
   if (pid == 0){ //child process
     // out=execvp(args[0], args);
@@ -252,7 +253,7 @@ int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[],
     if (out<0){
       execvp(args[0], args);
     }
-    if(redr==3){
+    if(redr==3){ //redr 3: prints the history
       if(ct<=10){
         for(int i=ct;i>1;i--){
           printf("%d- %s", i-1, hist[i-1]);
@@ -262,10 +263,10 @@ int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[],
           printf("%d- %s", i, hist[i]);
         }
       }
-    }else if(redr==4){
+    }else if(redr==4){ //redr 4: executes the last command on the history
 
 
-      
+
     }
 
     close(xf);
