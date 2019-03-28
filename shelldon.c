@@ -3,10 +3,7 @@
 
 KUSIS ID: 53940 PARTNER NAME: Asli Karahan
 KUSIS ID: 54040 PARTNER NAME: Gökalp Ünsal
-<<<<<<< HEAD
-=======
 
->>>>>>> 53ee9722f0e3ff9e8abaf09eb83bad5a03a2a1ae
 
 */
 
@@ -56,19 +53,6 @@ int main(void)
       */
       executeCommand(args, file, redir, background, history, &command_count, which_command);
       printf("%d\n", command_count );
-      if (command_count<10){
-        for(int i =0; i<command_count; i++){
-        //  printf("History is %s\n", history[i]);
-        }
-      }else{
-        for(int i =0; i<10; i++){
-          //printf("History is %s\n", history[i]);
-
-        }
-      }
-
-
-
     }
   }
   return 0;
@@ -228,6 +212,7 @@ if(*redir==4) printf("i am here\n" );
       }else if(strncmp(inputBuffer, "codesearch", 10) == 0){
         *redir=6;
         i=i+1;
+      }
 
 
     } /* end of switch */
@@ -276,7 +261,6 @@ int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[],
       *comm_count=ct+1;
       printf("Command number not in recent history\n");
     }else{
-      printf("Legal arguement\n");
       printf("Executing Command: %s from history\n", hist[*comm_count-which_comm]);
       parseCommand(hist[*comm_count-which_comm], args, &backg, file, &redr, comm_count, hist, &which_comm);
     }
