@@ -1,8 +1,9 @@
 /*
 * shelldon interface program
 
-KUSIS ID: 54040 PARTNER NAME: Gökalp Ünsal
 KUSIS ID: 53940 PARTNER NAME: Asli Karahan
+KUSIS ID: 54040 PARTNER NAME: Gökalp Ünsal
+
 
 */
 
@@ -251,7 +252,7 @@ int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[],
   pid=fork();
   if (pid == 0){ //child process
 
-  
+
     //if(redr==3){ //redr 3: prints the history
     int ct = *comm_count; // command counter
     if(redr==4){ //redr 4: executes the last command on the history
