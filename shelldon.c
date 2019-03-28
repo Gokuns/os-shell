@@ -92,7 +92,7 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
 *comm_count = *comm_count+1; //increment the command count first
 int asd = *comm_count;
 
-if(redir!=4 && redir !=5){
+if(*redir!=4 && *redir !=5){
     memset(inputBuffer, 0, MAX_LINE * sizeof(char));
   do {
     printf("shelldon>");
@@ -101,10 +101,13 @@ if(redir!=4 && redir !=5){
   }
   while (inputBuffer[0] == '\n'); /* swallow newline characters */
   //printf(" Current input buffer is %s\n", inputBuffer);
-  addToHistory(asd, hist, inputBuffer);
+
+}else{
+  length=strlen(inputBuffer);
 }
 
-if(redir==4) printf("i am here\n" );
+addToHistory(asd, hist, inputBuffer);
+if(*redir==4) printf("i am here\n" );
 
 
   // printf("This is pointer val %d\n", asd );
@@ -242,16 +245,19 @@ int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[],
     // printf("Filename is %s\n", file[2] );
     //if(redr==3){ //redr 3: prints the history
     int ct = *comm_count; // command counter
+    if(redr==4){ //redr 4: executes the last command on the history
+      parseCommand(hist[0], args, &backg, file, &redr, comm_count, hist);
+    }
+    else if (redr == 5){
+    }
+
     if(redr ==3){
     if(ct>10) ct=10;
         for(int i=ct-1;i>0;i--){
           if(hist[i])
           printf("%d- %s", i, hist[i]);
        }
-    }else if(redr==4){ //redr 4: executes the last command on the history
-
-
-    }
+     }
     mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
     if(redr ==2){
       xf=open(file[1],O_RDWR|O_TRUNC|O_CREAT, mode);
