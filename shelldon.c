@@ -254,12 +254,7 @@ int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[],
   pid=fork();
   if (pid == 0){ //child process
 
-    // out=execvp(args[0], args);
-    // printf("Redirected val is%d\n", redir);
-    //
-    // printf("Filename is %s\n", file[0] );
-    // printf("Filename is %s\n", file[1] );
-    // printf("Filename is %s\n", file[2] );
+  
     //if(redr==3){ //redr 3: prints the history
     int ct = *comm_count; // command counter
     if(redr==4){ //redr 4: executes the last command on the history
