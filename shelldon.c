@@ -308,6 +308,11 @@ int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[],
 
 
   }else if(pid>0){
+    if (strncmp(args[0], "cd", 2) == 0){
+      chdir(args[1]);
+    }
+
+
 
     if(backg != 1){
       // printf("Waitin for child to exit\n" );
