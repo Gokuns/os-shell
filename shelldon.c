@@ -219,9 +219,12 @@ if(*redir==4) printf("i am here\n" );
           *which_comm=number;
 
         }
-      }else if(strncmp(inputBuffer, "history", 4) == 0){
+      }else if(strncmp(inputBuffer, "history", 7) == 0){
         *redir=3;
-      }
+        i=i+1;
+      }else if(strncmp(inputBuffer, "codesearch", 10) == 0){
+        *redir=6;
+        i=i+1;
 
 
     } /* end of switch */
