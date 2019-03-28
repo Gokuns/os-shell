@@ -3,6 +3,10 @@
 
 KUSIS ID: 53940 PARTNER NAME: Asli Karahan
 KUSIS ID: 54040 PARTNER NAME: Gökalp Ünsal
+<<<<<<< HEAD
+=======
+
+>>>>>>> 53ee9722f0e3ff9e8abaf09eb83bad5a03a2a1ae
 
 */
 
