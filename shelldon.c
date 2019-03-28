@@ -18,8 +18,8 @@ KUSIS ID: 53940 PARTNER NAME: Asli Karahan
 
 
 
-int parseCommand(char inputBuffer[], char *args[],int *background, char* file[], int* redir , int* comm_count, char *hist[]);
-int executeCommand(char *args[], char* file[],int redr, int backg, char* hist[], int* comm_count); //char** hist);
+int parseCommand(char inputBuffer[], char *args[],int *background, char* file[], int* redir , int* comm_count, char *hist[], int* which_comm);
+int executeCommand(char *args[], char* file[],int redr, int backg, char* hist[], int* comm_count, int which_comm); //char** hist);
 int addToHistory(int ct, char *hist[], char context[]);
 int main(void)
 {
@@ -34,11 +34,12 @@ int main(void)
   char *file[MAX_LINE/2 + 1];	 //output filename
   char *history[11];
   int command_count =0;
+  int which_command=-1;
   while (shouldrun){            		/* Program terminates normally inside setup */
     background = 0;
     redir =0;
 
-    shouldrun = parseCommand(inputBuffer,args,&background, file, &redir, &command_count, history);       /* get next command */
+    shouldrun = parseCommand(inputBuffer,args,&background, file, &redir, &command_count, history, &which_command);       /* get next command */
 
     if (strncmp(inputBuffer, "exit", 4) == 0)
     shouldrun = 0;     /* Exiting from shelldon*/
@@ -49,7 +50,7 @@ int main(void)
       (2) the child process will invoke execv()
       (3) if command included &, parent will invoke wait()
       */
-      executeCommand(args, file, redir, background, history, &command_count);
+      executeCommand(args, file, redir, background, history, &command_count, which_command);
       printf("%d\n", command_count );
       if (command_count<10){
         for(int i =0; i<command_count; i++){
@@ -76,7 +77,7 @@ int main(void)
 * will become null-terminated, C-style strings.
 */
 
-int parseCommand(char inputBuffer[], char *args[],int *background, char* file[], int* redir, int* comm_count, char* hist[] )
+int parseCommand(char inputBuffer[], char *args[],int *background, char* file[], int* redir, int* comm_count, char* hist[] , int* which_comm)
 {
   int length,		/* # of characters in the command line */
   i,		/* loop index for accessing inputBuffer array */
@@ -200,9 +201,22 @@ if(*redir==4) printf("i am here\n" );
           //parseCommand(hist[1], args,background, file, redir, comm_count,hist);
         //  char*  a = strcat("\n", hist[1]);
 
-        }else if(hist[inputBuffer[i+1]]){
+        }else{
           *redir=5;
           i=i+1;
+          char num[4];
+          int ptr =0;
+          while(i!=(length-1)){
+            num[ptr] = inputBuffer[i];
+            printf("%c\n", inputBuffer[i]);
+            ptr+=1;
+            i=i+1;
+          }
+          int number = atoi(num);
+          // printf("%d\n", number );
+          memset(num, 0, 4 * sizeof(char));
+          *which_comm=number;
+
         }
       }else if(strncmp(inputBuffer, "history", 4) == 0){
         *redir=3;
@@ -227,7 +241,7 @@ if(*redir==4) printf("i am here\n" );
 
 } /* end of parseCommand routine */
 
-int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[], int *comm_count){
+int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[], int *comm_count, int which_comm){
 
 
   pid_t pid;
@@ -246,17 +260,31 @@ int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[],
     //if(redr==3){ //redr 3: prints the history
     int ct = *comm_count; // command counter
     if(redr==4){ //redr 4: executes the last command on the history
-      parseCommand(hist[0], args, &backg, file, &redr, comm_count, hist);
+      if(*comm_count != 1){
+      printf("Got so far\n" );
+      parseCommand(hist[0], args, &backg, file, &redr, comm_count, hist, &which_comm);
+    }else{
+  printf("No history yet\n" );}
     }
     else if (redr == 5){
+      if(which_comm>=*comm_count){
+      *comm_count=ct+1;
+      printf("You haven't provided that many commands\n");
+    }  else if(which_comm<*comm_count-9){
+      *comm_count=ct+1;
+      printf("Command number not in recent history\n");
+    }else{
+      printf("Legal arguement\n");
+      printf("Executing Command: %s from history\n", hist[*comm_count-which_comm]);
+      parseCommand(hist[*comm_count-which_comm], args, &backg, file, &redr, comm_count, hist, &which_comm);
+    }
     }
 
     if(redr ==3){
-      int iter = ct;
-    if(ct>10) iter=10;
-        for(int i=1;i<=iter;i++){
+    if(ct>10) ct=10;
+        for(int i=ct-1;i>0;i--){
           if(hist[i])
-          printf("%d- %s", ct-i, hist[i]);
+          printf("%d- %s", i, hist[i]);
        }
      }
     mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
