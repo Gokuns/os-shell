@@ -208,10 +208,8 @@ if(*redir==4) printf("i am here\n" );
         }
       }else if(strncmp(inputBuffer, "history", 7) == 0){
         *redir=3;
-        i=i+1;
       }else if(strncmp(inputBuffer, "codesearch", 10) == 0){
         *redir=6;
-        i=i+1;
       }
 
 
@@ -267,10 +265,10 @@ int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[],
     }
 
     if(redr ==3){
-    if(ct>10) ct=10;
-        for(int i=ct-1;i>0;i--){
-          if(hist[i])
-          printf("%d- %s", i, hist[i]);
+      int iter = ct;
+    if(ct>10) iter=10;
+        for(int i=1;i<=iter;i++){
+          printf("%d- %s", ct-i, hist[i]);
        }
      }
     mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
@@ -294,9 +292,9 @@ int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[],
 
 
   }else if(pid>0){
-    if (strncmp(args[0], "cd", 2) == 0){
-      chdir(args[1]);
-    }
+  //  if (strncmp(args[0], "cd", 2) == 0){
+  //    chdir(args[1]);
+  //  }
 
 
 
