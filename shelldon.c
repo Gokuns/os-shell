@@ -204,6 +204,9 @@ if(*redir==4) printf("i am here\n" );
           // printf("%d\n", number );
           memset(num, 0, 4 * sizeof(char));
           *which_comm=number;
+          if(hist[*comm_count-*which_comm])
+          addToHistory(asd, hist, hist[*comm_count-*which_comm]);
+          *comm_count = *comm_count+1;
 
         }
       }else if(strncmp(inputBuffer, "history", 7) == 0){
@@ -260,6 +263,8 @@ int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[],
       printf("Command number not in recent history\n");
     }else{
       printf("Executing Command: %s from history\n", hist[*comm_count-which_comm]);
+      *comm_count=ct+1;
+      addToHistory(*comm_count+1, hist, hist[*comm_count-which_comm]);
       parseCommand(hist[*comm_count-which_comm], args, &backg, file, &redr, comm_count, hist, &which_comm);
     }
     }
@@ -325,11 +330,11 @@ int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[],
 
 int addToHistory(int ct, char *hist[], char context[]){
   if(ct<10){
-    for(int i=ct;i>-1;i--){
+    for(int i=ct;i>=0;i--){
       hist[i+1]=hist[i];
     }
   }else if (ct>=10){
-    for(int i=10;i>-1;i--){
+    for(int i=10;i>=0;i--){
       hist[i+1]=hist[i];
     }
   }
