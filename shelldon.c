@@ -20,6 +20,7 @@ KUSIS ID: 53940 PARTNER NAME: Asli Karahan
 
 int parseCommand(char inputBuffer[], char *args[],int *background, char* file[], int* redir , int* comm_count, char *hist[]);
 int executeCommand(char *args[], char* file[],int redr, int backg, char* hist[], int* comm_count); //char** hist);
+int addToHistory(int ct, char *hist[], char context[]);
 int main(void)
 {
   char inputBuffer[MAX_LINE]; 	        /* buffer to hold the command entered */
@@ -87,10 +88,12 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
   int ct_2 =0;
   /* read what the user enters on the command line */
 //  printf("Given input buffer is %s\n", inputBuffer);
-  memset(inputBuffer, 0, MAX_LINE * sizeof(char));
-//  printf("Input buffer after sifirlama is %s\n", inputBuffer);
 
-if(redir!=4 || redir != 5){
+*comm_count = *comm_count+1; //increment the command count first
+int asd = *comm_count;
+
+if(redir!=4 && redir !=5){
+    memset(inputBuffer, 0, MAX_LINE * sizeof(char));
   do {
     printf("shelldon>");
     fflush(stdout);
@@ -98,20 +101,12 @@ if(redir!=4 || redir != 5){
   }
   while (inputBuffer[0] == '\n'); /* swallow newline characters */
   //printf(" Current input buffer is %s\n", inputBuffer);
+  addToHistory(asd, hist, inputBuffer);
 }
-  int asd = *comm_count;
-if(asd+1<10){
-  printf("ctRem is: %d\n", asd);
-  for(int i=asd+1;i>=0;i--){
-    hist[i+1]=hist[i];
-  }
-}else if (asd+1>=10){
-  for(int i=10;i>=0;i--){
-    hist[i+1]=hist[i];
-  }
-}
-hist[0]= malloc(MAX_LINE * sizeof(char));
-strcat(hist[0], inputBuffer);
+
+if(redir==4) printf("i am here\n" );
+
+
   // printf("This is pointer val %d\n", asd );
 
   /**
@@ -196,7 +191,12 @@ strcat(hist[0], inputBuffer);
         if(inputBuffer[i+1] == '!'){
           *redir=4;
           i=i+1;
-          parseCommand(hist[1], args,background, file, redir, comm_count,hist);
+          printf("%s\n",hist[1] );
+          addToHistory(asd, hist, hist[1]);
+            *comm_count = *comm_count+1;
+          //parseCommand(hist[1], args,background, file, redir, comm_count,hist);
+        //  char*  a = strcat("\n", hist[1]);
+
         }else if(hist[inputBuffer[i+1]]){
           *redir=5;
           i=i+1;
@@ -217,7 +217,7 @@ strcat(hist[0], inputBuffer);
   args[--ct] = NULL;
 
   args[ct] = NULL; /* just in case the input line was > 80 */
-  *comm_count = *comm_count+1;
+
   // printf("comm_count is %d\n", (*comm_count)%10);
 
   return 1;
@@ -230,15 +230,28 @@ int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[],
   pid_t pid;
   int out =0;
   int xf;
-  int ct = *comm_count; // command counter
+
   pid=fork();
   if (pid == 0){ //child process
+
     // out=execvp(args[0], args);
     // printf("Redirected val is%d\n", redir);
     //
     // printf("Filename is %s\n", file[0] );
     // printf("Filename is %s\n", file[1] );
     // printf("Filename is %s\n", file[2] );
+    //if(redr==3){ //redr 3: prints the history
+    int ct = *comm_count; // command counter
+    if(redr ==3){
+    if(ct>10) ct=10;
+        for(int i=ct-1;i>0;i--){
+          if(hist[i])
+          printf("%d- %s", i, hist[i]);
+       }
+    }else if(redr==4){ //redr 4: executes the last command on the history
+
+
+    }
     mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
     if(redr ==2){
       xf=open(file[1],O_RDWR|O_TRUNC|O_CREAT, mode);
@@ -253,21 +266,7 @@ int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[],
     if (out<0){
       execvp(args[0], args);
     }
-    if(redr==3){ //redr 3: prints the history
-      if(ct<=10){
-        for(int i=ct;i>1;i--){
-          printf("%d- %s", i-1, hist[i-1]);
-          }
-      }else if(ct>10){
-        for(int i=10;i>0;i--){
-          printf("%d- %s", i, hist[i]);
-        }
-      }
-    }else if(redr==4){ //redr 4: executes the last command on the history
 
-
-
-    }
 
     close(xf);
     exit(1);
@@ -298,4 +297,18 @@ int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[],
   // // hist[0]=args[0];
   // printf("%s\n", hist[(*comm_count)%10]);
   return 1;
+}
+
+int addToHistory(int ct, char *hist[], char context[]){
+  if(ct<10){
+    for(int i=ct;i>-1;i--){
+      hist[i+1]=hist[i];
+    }
+  }else if (ct>=10){
+    for(int i=10;i>-1;i--){
+      hist[i+1]=hist[i];
+    }
+  }
+  hist[0]= malloc(MAX_LINE * sizeof(char));
+  strcat(hist[0], context);
 }
