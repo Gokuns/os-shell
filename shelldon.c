@@ -196,6 +196,7 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
         *redir=3;
       }else if(strncmp(inputBuffer, "codesearch", 10) == 0){
         *redir=6;
+        //Gokolop
       }
 
 
@@ -291,25 +292,32 @@ Code Search Feature
 
        }
         if(cont[0]=='"' && cont[len-1]=='"'){
-          printf("oley\n" );
+
 
           FILE  *fptr;
           DIR *d;
           struct dirent *dir;
           d = opendir(".");
+          int index;
           if (d)
           {
               while ((dir = readdir(d)) != NULL)
               {
                   printf("%s\n", dir->d_name);
                   fptr = fopen( dir->d_name, "r");
-                 char line [ 128 ]; /* or other suitable maximum line size */
+                 char line [ 500 ]; /* or other suitable maximum line size */
+                 index=0;
                   while ( fgets ( line, sizeof line, fptr ) != NULL ) /* read a line */
                  {
-                    if(strstr(line,cont)!=NULL)
-                    printf("hahahhahaha\n");
+                    char subbuff[len];
+                    memcpy( subbuff, &cont[1], len-2);
+                    subbuff[len] = '\0';
+                    if(strstr(line,subbuff)!=NULL){
+                    printf("%s\n",subbuff);
+                    index++;
+                    printf("%d\n",index);
+                  }
                  }
-
               }
               fclose(fptr);
               closedir(d);
