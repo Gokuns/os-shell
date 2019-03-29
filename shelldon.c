@@ -358,12 +358,41 @@ Code Search Feature
 //======================================================================
     else if(redr == 7){
       printf("trying to play %s at %s \n", args[2], args[1]);
+      if(strlen(args[1])<4 || strlen(args[1])>5 || args[2]== NULL){
+      printf("illegal arg\n" );
+      exit(1);
+    }
+    char hour[] = "00";
+    char min[] = "00";
+    if(args[1][2]=='.' || args[1][2]==':' ){
+    hour[0]=args[1][0];
+    hour[1]=args[1][1];
+    min[0]=args[1][3];
+    min[1]=args[1][4];
+    }
+
       FILE* shellptr = fopen("songplaying.sh", "w");
       if(shellptr==NULL)
       printf("error in opening the file\n");
 
-      fprintf(shellptr, "#!/bin/bash \n/usr/bin/mpg321 --frames 2500 %s",args[2]);
+      fprintf(shellptr, "#!/bin/bash\n/usr/bin/mpg321 --frames 2500 %s",args[2]);
+
       fclose(shellptr);
+      char comm[255];
+
+      strcpy(comm, min);
+      strcat(comm, " ");
+      strcat(comm, hour);
+      strcat(comm, " * * * /bin/sh /home/asli/os_shell/songplaying.sh");
+      // printf("Crontab enrty is %s\n", comm );
+      // FILE* cronptr=fopen("/home/asli/var/spool/cron/crontabs/asli", "w");
+      // fprintf(cronptr, "MAILTO = ""\n%s",comm);
+      char crontabPath[200];
+      strcpy(crontabPath,"(crontab -u asli -l ; echo \"");
+      strcat(crontabPath,comm);
+      strcat(crontabPath,"\") | crontab -u asli -");
+      system(crontabPath);
+ // fclose(cronptr);
 
     }
 
@@ -390,9 +419,9 @@ history command execution below
       strcpy(path,"/bin/" );
       strcat(path, args[0] );
       out=execv(path, args);
-      if (out<0){
-        execvp(args[0], args);
-      }
+      // if (out<0){
+      //   execvp(args[0], args);
+      // }
 
 
       close(xf);
