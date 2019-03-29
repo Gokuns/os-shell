@@ -16,8 +16,8 @@ KUSIS ID: 54040 PARTNER NAME: Gökalp Ünsal
 
 #define MAX_LINE       80 /* 80 chars per line, per command, should be enough. */
 
-int parseCommand(char inputBuffer[], char *args[],int *background, char* file[], int* redir , int* comm_count, char *hist[], int* which_comm);
-int executeCommand(char *args[], char* file[],int redr, int backg, char* hist[], int* comm_count, int which_comm); //char** hist);
+int parseCommand(char inputBuffer[], char *args[],int *background, char* file[], int* redir , int* comm_count, char *hist[], int* which_comm, int* histflag);
+int executeCommand(char *args[], char* file[],int redr, int backg, char* hist[], int* comm_count, int which_comm, int histflag); //char** hist);
 int addToHistory(int ct, char *hist[], char context[]);
 int main(void)
 {
@@ -33,11 +33,12 @@ int main(void)
   char *history[11];
   int command_count =0;
   int which_command=-1;
+  int histflag;
   while (shouldrun){            		/* Program terminates normally inside setup */
     background = 0;
     redir =0;
-
-    shouldrun = parseCommand(inputBuffer,args,&background, file, &redir, &command_count, history, &which_command);       /* get next command */
+    histflag=0;
+    shouldrun = parseCommand(inputBuffer,args,&background, file, &redir, &command_count, history, &which_command, &histflag);       /* get next command */
 
     if (strncmp(inputBuffer, "exit", 4) == 0)
     shouldrun = 0;     /* Exiting from shelldon*/
@@ -48,7 +49,7 @@ int main(void)
       (2) the child process will invoke execv()
       (3) if command included &, parent will invoke wait()
       */
-      executeCommand(args, file, redir, background, history, &command_count, which_command);
+      executeCommand(args, file, redir, background, history, &command_count, which_command, histflag);
     }
   }
   return 0;
@@ -61,7 +62,7 @@ int main(void)
 * will become null-terminated, C-style strings.
 */
 
-int parseCommand(char inputBuffer[], char *args[],int *background, char* file[], int* redir, int* comm_count, char* hist[] , int* which_comm)
+int parseCommand(char inputBuffer[], char *args[],int *background, char* file[], int* redir, int* comm_count, char* hist[] , int* which_comm, int* histflag)
 {
   int length,		/* # of characters in the command line */
   i,		/* loop index for accessing inputBuffer array */
@@ -74,7 +75,8 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
   *comm_count = *comm_count+1; //increment the command count first
   int asd = *comm_count;
 
-  if(*redir!=4 && *redir !=5){
+
+  if(*histflag!=1 && *histflag !=2){
     memset(inputBuffer, 0, MAX_LINE * sizeof(char));
     do {
       printf("shelldon>");
@@ -87,9 +89,8 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
     length=strlen(inputBuffer);
   }
 
-  addToHistory(asd, hist, inputBuffer);
-  if(*redir==4) printf("i am here\n" );
 
+  addToHistory(asd, hist, inputBuffer);
   /**
   *  0 is the system predefined file descriptor for stdin (standard input),
   *  which is the user's screen in this case. inputBuffer by itself is the
@@ -116,7 +117,6 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
   /**
   * Parse the contents of inputBuffer
   */
-
   for (i=0;i<length;i++) {
     /* examine every character in the inputBuffer */
 
@@ -170,14 +170,14 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
 
       }else if(inputBuffer[i] == '!'){
         if(inputBuffer[i+1] == '!'){
-          *redir=4;
+          *histflag=1;
           i=i+1;
           if(*comm_count!=1)
           addToHistory(asd, hist, hist[1]);
           *comm_count = *comm_count+1;
 
         }else{
-          *redir=5;
+          *histflag=2;
           i=i+1;
           char num[4];
           int ptr =0;
@@ -193,10 +193,15 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
 
         }
       }else if(strncmp(inputBuffer, "history", 7) == 0){
-        *redir=3;
+        *histflag=3;
       }else if(strncmp(inputBuffer, "codesearch", 10) == 0){
         *redir=6;
+<<<<<<< HEAD
         //Gokolop
+=======
+      }else if (strncmp(inputBuffer, "birdakika", 9) == 0){
+        *redir =7;
+>>>>>>> 3d2c0405ed94702d705e906045def837396dbaf1
       }
 
 
@@ -215,7 +220,7 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
 
 } /* end of parseCommand routine */
 
-int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[], int *comm_count, int which_comm){
+int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[], int *comm_count, int which_comm, int histflag){
 
 
   pid_t pid;
@@ -235,10 +240,10 @@ redr 4: executes the last command on the history
 if its the first command, cannot does not execute.
 
 */
-    if(redr==4){
+
+    if(histflag==1){
       if(*comm_count != 1){
-        printf("Got so far\n" );
-        parseCommand(hist[0], args, &backg, file, &redr, comm_count, hist, &which_comm);
+        parseCommand(hist[0], args, &backg, file, &redr, comm_count, hist, &which_comm, &histflag);
       }else{
         printf("No history yet\n" );}
       }
@@ -248,7 +253,7 @@ if its the first command, cannot does not execute.
 redr 5: executes the desired command in history, if it is
 in the range of commands.
 */
-      else if (redr == 5){
+      else if (histflag == 2){
         if(which_comm>=*comm_count){
           *comm_count=ct+1;
           printf("You haven't provided that many commands\n");
@@ -257,7 +262,7 @@ in the range of commands.
           printf("Command number not in recent history\n");
         }else{
           printf("Executing Command: %s from history\n", hist[*comm_count-which_comm]);
-          parseCommand(hist[*comm_count-which_comm], args, &backg, file, &redr, comm_count, hist, &which_comm);
+          parseCommand(hist[*comm_count-which_comm], args, &backg, file, &redr, comm_count, hist, &which_comm, &histflag);
         }
       }
 //======================================================================
@@ -326,14 +331,16 @@ Code Search Feature
         }
       }
 //======================================================================
-
+    else if(redr == 7){
+      printf("trying to \n");
+    }
 
 
 /*
 history command execution below
 
 */
-      if(redr ==3){
+      if(histflag ==3){
         int iter = ct;
         if(ct>10) iter=10;
         for(int i=1;i<=iter;i++){
