@@ -4,6 +4,8 @@ KUSIS ID: 53940 PARTNER NAME: Asli Karahan
 KUSIS ID: 54040 PARTNER NAME: Gökalp Ünsal
 */
 
+
+#include <dirent.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
@@ -224,13 +226,27 @@ int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[],
 
 
     int ct = *comm_count; // command counter
-    if(redr==4){ //redr 4: executes the last command on the history
+//======================================================================
+
+
+/*
+redr 4: executes the last command on the history
+if its the first command, cannot does not execute.
+
+*/
+    if(redr==4){
       if(*comm_count != 1){
         printf("Got so far\n" );
         parseCommand(hist[0], args, &backg, file, &redr, comm_count, hist, &which_comm);
       }else{
         printf("No history yet\n" );}
       }
+//======================================================================
+
+/*
+redr 5: executes the desired command in history, if it is
+in the range of commands.
+*/
       else if (redr == 5){
         if(which_comm>=*comm_count){
           *comm_count=ct+1;
@@ -243,7 +259,72 @@ int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[],
           parseCommand(hist[*comm_count-which_comm], args, &backg, file, &redr, comm_count, hist, &which_comm);
         }
       }
+//======================================================================
 
+/*
+Code Search Feature
+
+*/
+
+      else if (redr == 6){
+        printf("keyword to be searched is: %s\n",args[1]);
+        char cont[80];
+                int len;
+        memset(cont, 0, MAX_LINE * sizeof(char));
+        if(strncmp(args[1],"-r",2)==0){
+
+          strcat(cont, args[2]);
+           len = strlen(args[2]);
+
+        }else if(strncmp(args[1],"-f",2)==0){
+
+        strcat(cont, args[2]);
+         len = strlen(args[2]);
+
+       }else{
+
+         strcat(cont, args[1]);
+         len = strlen(args[1]);
+
+
+
+
+       }
+        if(cont[0]=='"' && cont[len-1]=='"'){
+          printf("oley\n" );
+
+          FILE  *fptr;
+          DIR *d;
+          struct dirent *dir;
+          d = opendir(".");
+          if (d)
+          {
+              while ((dir = readdir(d)) != NULL)
+              {
+                  printf("%s\n", dir->d_name);
+                  fptr = fopen( dir->d_name, "r");
+                 char line [ 128 ]; /* or other suitable maximum line size */
+                  while ( fgets ( line, sizeof line, fptr ) != NULL ) /* read a line */
+                 {
+                    if(strstr(line,cont)!=NULL)
+                    printf("hahahhahaha\n");
+                 }
+
+              }
+              fclose(fptr);
+              closedir(d);
+          }
+
+        }
+      }
+//======================================================================
+
+
+
+/*
+history command execution below
+
+*/
       if(redr ==3){
         int iter = ct;
         if(ct>10) iter=10;
@@ -272,7 +353,7 @@ int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[],
 
 
     }else if(pid>0){
-      //  if (strncmp(args[0], "cd", 2) == 0){
+      // if (strncmp(args[0], "cd", 2) == 0){
       //    chdir(args[1]);
       //  }
       if(backg != 1){
@@ -284,6 +365,7 @@ int executeCommand(char *args[], char* file[],int redr, int backg, char *hist[],
 
     return 1;
   }
+//======================================================================
 
   int addToHistory(int ct, char *hist[], char context[]){
     if(ct<10){
