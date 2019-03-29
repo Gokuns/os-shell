@@ -308,8 +308,20 @@ Code Search Feature
                  char line [ 128 ]; /* or other suitable maximum line size */
                   while ( fgets ( line, sizeof line, fptr ) != NULL ) /* read a line */
                  {
+<<<<<<< HEAD
                     if(strstr(line,cont)!=NULL)
                     printf("hahahhahaha\n");
+=======
+                    char subbuff[len];
+                    memcpy( subbuff, &cont[1], len-2);
+                    subbuff[len] = '\0';
+                    index++;
+
+                    if(strstr(line,subbuff)!=NULL){
+                      printf("%d: %s -> ./%s\n",index, dir->d_name, line);
+
+                  }
+>>>>>>> 4617907b6dfc2b7f0d011004cb6f6bf90d1c785b
                  }
 
               }
