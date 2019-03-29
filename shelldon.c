@@ -196,12 +196,8 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
         *histflag=3;
       }else if(strncmp(inputBuffer, "codesearch", 10) == 0){
         *redir=6;
-<<<<<<< HEAD
-        //Gokolop
-=======
       }else if (strncmp(inputBuffer, "birdakika", 9) == 0){
         *redir =7;
->>>>>>> 3d2c0405ed94702d705e906045def837396dbaf1
       }
 
 
@@ -272,7 +268,7 @@ Code Search Feature
 
 */
 
-      else if (redr == 6){
+      if (redr == 6){
         printf("keyword to be searched is: %s\n",args[1]);
         char cont[80];
                 int len;
@@ -297,32 +293,25 @@ Code Search Feature
 
        }
         if(cont[0]=='"' && cont[len-1]=='"'){
-
+          printf("oley\n" );
 
           FILE  *fptr;
           DIR *d;
           struct dirent *dir;
           d = opendir(".");
-          int index;
           if (d)
           {
               while ((dir = readdir(d)) != NULL)
               {
                   printf("%s\n", dir->d_name);
                   fptr = fopen( dir->d_name, "r");
-                 char line [ 500 ]; /* or other suitable maximum line size */
-                 index=0;
+                 char line [ 128 ]; /* or other suitable maximum line size */
                   while ( fgets ( line, sizeof line, fptr ) != NULL ) /* read a line */
                  {
-                    char subbuff[len];
-                    memcpy( subbuff, &cont[1], len-2);
-                    subbuff[len] = '\0';
-                    if(strstr(line,subbuff)!=NULL){
-                    printf("%s\n",subbuff);
-                    index++;
-                    printf("%d\n",index);
-                  }
+                    if(strstr(line,cont)!=NULL)
+                    printf("hahahhahaha\n");
                  }
+
               }
               fclose(fptr);
               closedir(d);
@@ -332,7 +321,14 @@ Code Search Feature
       }
 //======================================================================
     else if(redr == 7){
-      printf("trying to \n");
+      printf("trying to play %s at %s \n", args[2], args[1]);
+      FILE* shellptr = fopen("songplaying.sh", "w");
+      if(shellptr==NULL)
+      printf("error in opening the file\n");
+
+      fprintf(shellptr, "#!/bin/bash \n/usr/bin/mpg321 --frames 2500 %s",args[2]);
+      fclose(shellptr);
+
     }
 
 
