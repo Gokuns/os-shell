@@ -196,12 +196,8 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
         *histflag=3;
       }else if(strncmp(inputBuffer, "codesearch", 10) == 0){
         *redir=6;
-<<<<<<< HEAD
-        //Gokolop
-=======
       }else if (strncmp(inputBuffer, "birdakika", 9) == 0){
         *redir =7;
->>>>>>> 3d2c0405ed94702d705e906045def837396dbaf1
       }
 
 
@@ -317,10 +313,11 @@ Code Search Feature
                     char subbuff[len];
                     memcpy( subbuff, &cont[1], len-2);
                     subbuff[len] = '\0';
-                    if(strstr(line,subbuff)!=NULL){
-                    printf("%s\n",subbuff);
                     index++;
-                    printf("%d\n",index);
+
+                    if(strstr(line,subbuff)!=NULL){
+                      printf("%d: %s -> ./%s\n",index, dir->d_name, line);
+
                   }
                  }
               }
