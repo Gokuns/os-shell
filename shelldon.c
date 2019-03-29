@@ -4,7 +4,8 @@ KUSIS ID: 53940 PARTNER NAME: Asli Karahan
 KUSIS ID: 54040 PARTNER NAME: Gökalp Ünsal
 */
 
-
+#include <wait.h>
+#include <libgen.h>
 #include <dirent.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -269,54 +270,78 @@ Code Search Feature
 */
 
       if (redr == 6){
-        printf("keyword to be searched is: %s\n",args[1]);
         char cont[80];
                 int len;
         memset(cont, 0, MAX_LINE * sizeof(char));
+        FILE  *fptr;
+        DIR *d;
+        struct dirent *dir;
+        int index;
+
         if(strncmp(args[1],"-r",2)==0){
 
           strcat(cont, args[2]);
            len = strlen(args[2]);
+                   printf("keyword to be searched is: %s\n",args[2]);
 
         }else if(strncmp(args[1],"-f",2)==0){
 
         strcat(cont, args[2]);
          len = strlen(args[2]);
+         char subbuff[len];
+         memcpy( subbuff, &cont[1], len-2);
+         subbuff[len-2] = '\0';
+         char* ts1 = strdup(args[3]);
+        char* ts2 = strdup(args[3]);
+        char* directory = dirname(ts1);
+        char* filename = basename(ts2);
+         d = opendir(directory);
+
+
+
+          if(cont[0]=='"' && cont[len-1]=='"'){
+            dir=readdir(d);
+                     printf("got here\n");
+                    fptr = fopen( filename, "r");
+                   char line [ 500 ]; /* or other suitable maximum line size */
+                   index=0;
+                    while ( fgets ( line, sizeof line, fptr ) != NULL ) /* read a line */
+                   {
+                      index++;
+
+                      if(strstr(line,subbuff)!=NULL){
+                        printf("%d: ./%s -> %s",index, filename, line);
+                    }
+                   }
+                fclose(fptr);
+                closedir(d);
+          }
 
        }else{
 
          strcat(cont, args[1]);
          len = strlen(args[1]);
-
-
-
-
-       }
+         char subbuff[len];
+         memcpy( subbuff, &cont[1], len-2);
+         subbuff[len-2] = '\0';
+        d = opendir(".");
+                printf("keyword to be searched is: %s\n",args[1]);
         if(cont[0]=='"' && cont[len-1]=='"'){
-          printf("oley\n" );
 
-          FILE  *fptr;
-          DIR *d;
-          struct dirent *dir;
-          d = opendir(".");
-          int index;
           if (d)
           {
               while ((dir = readdir(d)) != NULL)
               {
-                  printf("%s\n", dir->d_name);
                   fptr = fopen( dir->d_name, "r");
                  char line [ 500 ]; /* or other suitable maximum line size */
                  index=0;
                   while ( fgets ( line, sizeof line, fptr ) != NULL ) /* read a line */
                  {
-                    char subbuff[len];
-                    memcpy( subbuff, &cont[1], len-2);
-                    subbuff[len] = '\0';
+
                     index++;
 
                     if(strstr(line,subbuff)!=NULL){
-                      printf("%d: ./%s -> %s\n",index, dir->d_name, line);
+                      printf("%d: ./%s -> %s",index, dir->d_name, line);
 
                   }
                  }
@@ -326,6 +351,9 @@ Code Search Feature
           }
 
         }
+
+       }
+
       }
 //======================================================================
     else if(redr == 7){
