@@ -20,6 +20,8 @@ KUSIS ID: 54040 PARTNER NAME: Gökalp Ünsal
 int parseCommand(char inputBuffer[], char *args[],int *background, char* file[], int* redir , int* comm_count, char *hist[], int* which_comm, int* histflag);
 int executeCommand(char *args[], char* file[],int redr, int backg, char* hist[], int* comm_count, int which_comm, int histflag); //char** hist);
 int addToHistory(int ct, char *hist[], char context[]);
+int codeSearch(char *path, int mode, char *keyword);
+int concatKeyword(char result[], char *args[]);
 int main(void)
 {
   char inputBuffer[MAX_LINE]; 	        /* buffer to hold the command entered */
@@ -270,87 +272,21 @@ Code Search Feature
 */
 
       if (redr == 6){
-        char cont[80];
-                int len;
-        memset(cont, 0, MAX_LINE * sizeof(char));
-        FILE  *fptr;
-        DIR *d;
-        struct dirent *dir;
-        int index;
-
+        char context[80];
         if(strncmp(args[1],"-r",2)==0){
 
-          strcat(cont, args[2]);
-           len = strlen(args[2]);
+          strcat(context, args[2]);
+           int len = strlen(args[2]);
                    printf("keyword to be searched is: %s\n",args[2]);
 
         }else if(strncmp(args[1],"-f",2)==0){
 
-        strcat(cont, args[2]);
-         len = strlen(args[2]);
-         char subbuff[len];
-         memcpy( subbuff, &cont[1], len-2);
-         subbuff[len-2] = '\0';
-         char* ts1 = strdup(args[3]);
-        char* ts2 = strdup(args[3]);
-        char* directory = dirname(ts1);
-        char* filename = basename(ts2);
-         d = opendir(directory);
-
-
-
-          if(cont[0]=='"' && cont[len-1]=='"'){
-            dir=readdir(d);
-                     printf("got here\n");
-                    fptr = fopen( filename, "r");
-                   char line [ 500 ]; /* or other suitable maximum line size */
-                   index=0;
-                    while ( fgets ( line, sizeof line, fptr ) != NULL ) /* read a line */
-                   {
-                      index++;
-
-                      if(strstr(line,subbuff)!=NULL){
-                        printf("%d: ./%s -> %s",index, filename, line);
-                    }
-                   }
-                fclose(fptr);
-                closedir(d);
-          }
-
+          int num = concatKeyword(context,args);
+          codeSearch(args[num+2],1,context);
        }else{
-
-         strcat(cont, args[1]);
-         len = strlen(args[1]);
-         char subbuff[len];
-         memcpy( subbuff, &cont[1], len-2);
-         subbuff[len-2] = '\0';
-        d = opendir(".");
-                printf("keyword to be searched is: %s\n",args[1]);
-        if(cont[0]=='"' && cont[len-1]=='"'){
-
-          if (d)
-          {
-              while ((dir = readdir(d)) != NULL)
-              {
-                  fptr = fopen( dir->d_name, "r");
-                 char line [ 500 ]; /* or other suitable maximum line size */
-                 index=0;
-                  while ( fgets ( line, sizeof line, fptr ) != NULL ) /* read a line */
-                 {
-
-                    index++;
-
-                    if(strstr(line,subbuff)!=NULL){
-                      printf("%d: ./%s -> %s",index, dir->d_name, line);
-
-                  }
-                 }
-              }
-              fclose(fptr);
-              closedir(d);
-          }
-
-        }
+         //printf("%s\n",args[0] );
+        int num= concatKeyword(context,args);
+        codeSearch("", 0, context);
 
        }
 
@@ -443,7 +379,8 @@ history command execution below
   }
 //======================================================================
 
-  int addToHistory(int ct, char *hist[], char context[]){
+  int addToHistory(int ct, char *hist[], char context[])
+  {
     if(ct<10){
       for(int i=ct;i>-1;i--){
         hist[i+1]=hist[i];
@@ -455,4 +392,139 @@ history command execution below
     }
     hist[0]= malloc(MAX_LINE * sizeof(char));
     strcat(hist[0], context);
+  }
+
+  int codeSearch(char *path, int mode, char *keyword)
+  {
+
+    int len;
+    len = strlen(keyword);
+    FILE  *fptr;
+    DIR *d;
+    struct dirent *dir;
+    int index;
+    char subbuff[len];
+    memcpy( subbuff, &keyword[1], len-2);
+    subbuff[len-2] = '\0';
+
+    if(mode == 1)
+    {
+
+               char* ts1 = strdup(path);
+              char* ts2 = strdup(path);
+              char* directory = dirname(ts1);
+              char* filename = basename(ts2);
+               d = opendir(directory);
+
+
+
+                  dir=readdir(d);
+
+                          fptr = fopen( filename, "r");
+                         char line [ 500 ]; /* or other suitable maximum line size */
+                         index=0;
+                          while ( fgets ( line, sizeof line, fptr ) != NULL ) /* read a line */
+                         {
+                            index++;
+
+                            if(strstr(line,subbuff)!=NULL){
+                              printf("%d: ./%s -> %s",index, filename, line);
+                          }
+                         }
+                      fclose(fptr);
+                      closedir(d);
+
+
+    }else if(mode ==2)
+    {
+
+
+
+    }else
+    {
+      d = opendir(".");
+        if (d)
+        {
+            while ((dir = readdir(d)) != NULL)
+            {
+                fptr = fopen( dir->d_name, "r");
+               char line [ 500 ]; /* or other suitable maximum line size */
+               index=0;
+                while ( fgets ( line, sizeof line, fptr ) != NULL ) /* read a line */
+               {
+                  index++;
+                  if(strstr(line,keyword)!=NULL){
+                    printf("%d: ./%s -> %s",index, dir->d_name, line);
+                }
+               }
+            }
+            fclose(fptr);
+            closedir(d);
+        }
+    }
+}
+  int concatKeyword(char result[], char *args[])
+  {
+
+    memset(result, 0, MAX_LINE * sizeof(char));
+    int index=0;
+    char current[80];
+    int len;
+    char subc[80];
+
+    int return_lenght=0;
+
+                printf("whaaaa\n" );
+
+    while(args[index]!=NULL)
+    {
+      printf("got here\n");
+      memset(current, 0, MAX_LINE * sizeof(char));
+      memset(subc, 0, MAX_LINE * sizeof(char));
+      index=index+1;
+      strcat(current,args[index]);
+      len = strlen(current);
+      int notYet = 0;
+
+
+      if(current[0]=='"' && current[len-1] == '"')
+      {
+        return_lenght=return_lenght+1;
+        printf("hello there\n");
+        memcpy( subc, &current[1], len-2);
+        strcat(result, subc);
+
+        break;
+
+      }
+
+      else if(current[0]=='"')
+      {
+        memcpy( subc, &current[1], len-1);
+        strcat(result, subc);
+        strcat(result, " ");
+        return_lenght=return_lenght+1;
+        notYet = 1;
+      }
+      else if(current[len-1] == '"')
+      {
+        return_lenght=return_lenght+1;
+        memcpy( subc, &current[0], len-1);
+        strcat(result,subc);
+
+        break;
+      }
+      else if(notYet==1)
+      {
+          return_lenght=return_lenght+1;
+          strcat(result,current);
+          strcat(result, " ");
+          printf("%s\n", current);
+
+      }else  memset(current, 0, MAX_LINE * sizeof(char));
+    }
+     printf("%s\n", result);
+     printf("%d\n", return_lenght);
+    return return_lenght;
+
   }
