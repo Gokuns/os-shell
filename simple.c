@@ -22,7 +22,10 @@ struct list_head *list;
         printk(KERN_INFO "\nPARENT PID: %d PROCESS: %s ",task->pid, task->comm);
         list_for_each(list, &task->children){
             task_child = list_entry( list, struct task_struct, sibling );
-            printk(KERN_INFO "\nCHILD OF %s[%d] PID: %d PROCESS: %s ",task->comm, task->pid,  task_child->pid, task_child->comm);
+						printk(KERN_INFO "\nCHILD OF %s[%d] PID: %d PROCESS: %lld ",task->comm, task->pid,  task_child->pid, task_child->start_time);
+						printk(KERN_INFO "\nCHILD OF %s[%d] PID: %d PROCESS: %s ",task->comm, task->pid,  task_child->pid, task_child->comm);
+
+
         }
         printk("-----------------------------------------------------");    /*for aesthetics*/
     }
