@@ -14,6 +14,7 @@ KUSIS ID: 54040 PARTNER NAME: Gökalp Ünsal
 #include <sys/types.h>
 #include <string.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #define MAX_LINE       80 /* 80 chars per line, per command, should be enough. */
 
@@ -275,11 +276,11 @@ Code Search Feature
 
       if (redr == 6){
         char context[80];
+        printf("%s\n",args[1] );
         if(strncmp(args[1],"-r",2)==0){
 
-          strcat(context, args[2]);
-           int len = strlen(args[2]);
-                   printf("keyword to be searched is: %s\n",args[2]);
+          int num= concatKeyword(context,args);
+          codeSearch(".",2,context);
 
         }else if(strncmp(args[1],"-f",2)==0){
 
@@ -493,6 +494,45 @@ history command execution below
     }else if(mode ==2)
     {
 
+      d=opendir(path);
+      char path2[80];
+      int num=0;
+
+
+
+        if (d)
+        {
+            while ((dir = readdir(d)) != NULL && dir->d_name!="./")
+            {
+              memset(path2, 0, MAX_LINE * sizeof(char));
+              strcat(path2,"./");
+
+             strcat(path2,dir->d_name);
+              DIR* dire = opendir(path2);
+              if(dire)
+              {
+                codeSearch(path2,2,keyword );
+                closedir(dire);
+              }else if (ENOENT == errno){
+                return 0;
+              }
+
+                fptr = fopen( path2, "r");
+               char line [ 500 ]; /* or other suitable maximum line size */
+               index=0;
+                while ( fgets ( line, sizeof line, fptr ) != NULL ) /* read a line */
+               {
+                  index++;
+                  if(strstr(line,keyword)!=NULL){
+                    printf("%d: %s -> %s",index, dir->d_name, line);
+                }
+               }
+               fclose(fptr);
+            }
+
+
+            closedir(d);
+        }
 
 
     }else
@@ -529,7 +569,7 @@ history command execution below
 
     int return_lenght=0;
 
-                printf("whaaaa\n" );
+
 
     while(args[index]!=NULL)
     {
@@ -540,17 +580,13 @@ history command execution below
       strcat(current,args[index]);
       len = strlen(current);
       int notYet = 0;
-
-
       if(current[0]=='"' && current[len-1] == '"')
       {
         return_lenght=return_lenght+1;
-        printf("hello there\n");
+
         memcpy( subc, &current[1], len-2);
         strcat(result, subc);
-
         break;
-
       }
 
       else if(current[0]=='"')
@@ -574,12 +610,9 @@ history command execution below
           return_lenght=return_lenght+1;
           strcat(result,current);
           strcat(result, " ");
-          printf("%s\n", current);
 
       }else  memset(current, 0, MAX_LINE * sizeof(char));
     }
-     printf("%s\n", result);
-     printf("%d\n", return_lenght);
-    return return_lenght;
+    printf("%s\n",result );
 
   }
