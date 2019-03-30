@@ -201,6 +201,8 @@ int parseCommand(char inputBuffer[], char *args[],int *background, char* file[],
         *redir=6;
       }else if (strncmp(inputBuffer, "birdakika", 9) == 0){
         *redir =7;
+      }else if(strncmp(inputBuffer, "snapshot", 8) == 0){
+        *redir =8;
       }
 
 
@@ -260,7 +262,7 @@ in the range of commands.
           *comm_count=ct+1;
           printf("Command number not in recent history\n");
         }else{
-          printf("Executing Command: %s from history\n", hist[*comm_count-which_comm]);
+          printf("Executing Command: %s\n", hist[*comm_count-which_comm]);
           parseCommand(hist[*comm_count-which_comm], args, &backg, file, &redr, comm_count, hist, &which_comm, &histflag);
         }
       }
@@ -292,7 +294,7 @@ Code Search Feature
 
       }
 //======================================================================
-    else if(redr == 7){
+    if(redr == 7){
       printf("trying to play %s at %s \n", args[2], args[1]);
       if(strlen(args[1])<4 || strlen(args[1])>5 || args[2]== NULL){
       printf("illegal arg\n" );
@@ -329,6 +331,59 @@ Code Search Feature
       strcat(crontabPath,"\") | crontab -u asli -");
       system(crontabPath);
  // fclose(cronptr);
+
+    }
+    if (redr == 8){
+      printf("trying to get a snapshot\n" );
+      printf("Arguments is %s\n",args[1] );
+      if(args[1]==NULL){
+        FILE* snapptr = fopen("history_snapshot.txt", "w");
+        if(snapptr==NULL)
+        printf("error in opening the file\n");
+        char text[MAX_LINE*12];
+        strcpy(text,"The call to snapshot produces the following output\n");
+        printf("%s\n", text );
+        int iter = *comm_count;
+        if(*comm_count>10) iter=10;
+        for(int i=1;i<=iter-1;i++){
+          // printf("%d\n", i );
+          //
+          // char snum[5];
+          // itoa(i, snum, 10);
+          // strcat(text, snum);
+          strcat(text, hist[i]);
+        }
+
+        fprintf(snapptr, "\n%s",text);
+        fclose(snapptr);
+
+      }else{
+        char filename[MAX_LINE];
+        strcpy(filename, args[1]);
+        strcat(filename, ".txt");
+        printf("%s\n", filename);
+
+        FILE* snapptr = fopen(filename, "w");
+        if(snapptr==NULL)
+        printf("error in opening the file\n");
+        char text[MAX_LINE*12];
+        strcpy(text,"The call to snapshot produces the following output\n");
+        printf("%s\n", text );
+        int iter = *comm_count;
+        if(*comm_count>10) iter=10;
+        for(int i=1;i<=iter-1;i++){
+          // printf("%d\n", i );
+          //
+          // char snum[5];
+          // itoa(i, snum, 10);
+          // strcat(text, snum);
+          strcat(text, hist[i]);
+        }
+
+        fprintf(snapptr, "\n%s",text);
+        fclose(snapptr);
+
+      }
 
     }
 
