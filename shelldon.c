@@ -283,8 +283,9 @@ Code Search Feature
           codeSearch(".",2,context);
 
         }else if(strncmp(args[1],"-f",2)==0){
-
+  printf("%s\n",args[3] );
           int num = concatKeyword(context,args);
+  printf("%d\n",num );
           codeSearch(args[num+2],1,context);
        }else{
          //printf("%s\n",args[0] );
@@ -460,35 +461,39 @@ history command execution below
     struct dirent *dir;
     int index;
     char subbuff[len];
-    memcpy( subbuff, &keyword[1], len-2);
-    subbuff[len-2] = '\0';
+    memcpy( subbuff, &keyword[0], len);
+    subbuff[len] = '\0';
+
 
     if(mode == 1)
     {
 
-               char* ts1 = strdup(path);
-              char* ts2 = strdup(path);
-              char* directory = dirname(ts1);
-              char* filename = basename(ts2);
-               d = opendir(directory);
+      char* ts1 = strdup(path);
+     char* ts2 = strdup(path);
+     printf("hidda\n");
+     char* directory = dirname(ts1);
+     char* filename = basename(ts2);
+      d = opendir(directory);
 
 
 
-                  dir=readdir(d);
+         dir=readdir(d);
 
-                          fptr = fopen( filename, "r");
-                         char line [ 500 ]; /* or other suitable maximum line size */
-                         index=0;
-                          while ( fgets ( line, sizeof line, fptr ) != NULL ) /* read a line */
-                         {
-                            index++;
+                 fptr = fopen( filename, "r");
+                char line [ 500 ]; /* or other suitable maximum line size */
+                index=0;
+                 while ( fgets ( line, sizeof line, fptr ) != NULL ) /* read a line */
+                {
+                   index++;
 
-                            if(strstr(line,subbuff)!=NULL){
-                              printf("%d: ./%s -> %s",index, filename, line);
-                          }
-                         }
-                      fclose(fptr);
-                      closedir(d);
+                   if(strstr(line,subbuff)!=NULL){
+                     printf("%d: ./%s -> %s",index, filename, line);
+                 }
+                }
+             fclose(fptr);
+
+             closedir(d);
+
 
 
     }else if(mode ==2)
@@ -566,7 +571,7 @@ history command execution below
     char current[80];
     int len;
     char subc[80];
-
+    int notYet = 0;
     int return_lenght=0;
 
 
@@ -579,7 +584,7 @@ history command execution below
       index=index+1;
       strcat(current,args[index]);
       len = strlen(current);
-      int notYet = 0;
+
       if(current[0]=='"' && current[len-1] == '"')
       {
         return_lenght=return_lenght+1;
@@ -605,7 +610,7 @@ history command execution below
 
         break;
       }
-      else if(notYet==1)
+      else if(notYet!=0)
       {
           return_lenght=return_lenght+1;
           strcat(result,current);
@@ -614,5 +619,6 @@ history command execution below
       }else  memset(current, 0, MAX_LINE * sizeof(char));
     }
     printf("%s\n",result );
-
+    printf("%d\n",return_lenght );
+    return return_lenght;
   }
