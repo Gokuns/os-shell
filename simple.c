@@ -22,18 +22,24 @@ struct list_head *list;
         printk(KERN_INFO "\nPARENT PID: %d PROCESS: %s ",task->pid, task->comm);
 				unsigned long long s_time= 99999999999999999999;
 				int oldest_pid =0;
+				char comm_name[255];
+				memset(comm_name, 0, 255 * sizeof(char));
+
         list_for_each(list, &task->children){
             task_child = list_entry( list, struct task_struct, sibling);
 						if(task_child->start_time<s_time){
 							s_time=task_child->start_time;
 							oldest_pid =task_child->pid;
+							strcpy(comm_name, task_child->comm);
 						}
-						printk(KERN_INFO "\nCHILD OF %s[%d] PID: %d PROCESS: %lld ",task->comm, task->pid,  task_child->pid, task_child->start_time);
 						printk(KERN_INFO "\nCHILD OF %s[%d] PID: %d PROCESS: %s ",task->comm, task->pid,  task_child->pid, task_child->comm);
 
 
         }
-				printk(KERN_INFO "\nOldest child process is [%d] PID: with start time %lld",oldest_pid, s_time);
+
+				if(oldest_pid != 0){
+				printk(KERN_INFO "\nOldest child of [%d] is process [%d] PID: with name %s",task->pid,oldest_pid, comm_name);
+			}
 
         printk("-----------------------------------------------------");    /*for aesthetics*/
     }
