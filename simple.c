@@ -20,13 +20,21 @@ struct list_head *list;
 	printk(KERN_INFO "%s","LOADING MODULE\n");
     for_each_process( task ){
         printk(KERN_INFO "\nPARENT PID: %d PROCESS: %s ",task->pid, task->comm);
+				unsigned long long s_time= 99999999999999999999;
+				int oldest_pid =0;
         list_for_each(list, &task->children){
-            task_child = list_entry( list, struct task_struct, sibling );
+            task_child = list_entry( list, struct task_struct, sibling);
+						if(task_child->start_time<s_time){
+							s_time=task_child->start_time;
+							oldest_pid =task_child->pid;
+						}
 						printk(KERN_INFO "\nCHILD OF %s[%d] PID: %d PROCESS: %lld ",task->comm, task->pid,  task_child->pid, task_child->start_time);
 						printk(KERN_INFO "\nCHILD OF %s[%d] PID: %d PROCESS: %s ",task->comm, task->pid,  task_child->pid, task_child->comm);
 
 
         }
+				printk(KERN_INFO "\nOldest child process is [%d] PID: with start time %lld",oldest_pid, s_time);
+
         printk("-----------------------------------------------------");    /*for aesthetics*/
     }
 
